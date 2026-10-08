@@ -17,18 +17,40 @@ export const registerSchema = z
     message: "Şifreler eşleşmiyor",
   })
 
-export const addressSchema = z.object({
-  fullName: z.string().trim().min(3, "Ad soyad en az 3 karakter olmalı"),
-  phone: z
-    .string()
-    .trim()
-    .transform((value) => value.replace(/\D/g, ""))
-    .refine((value) => /^05\d{9}$/.test(value), "Geçerli bir cep telefonu girin (05xx)"),
-  city: z.string().trim().min(2, "İl gerekli"),
-  district: z.string().trim().min(2, "İlçe gerekli"),
-  line: z.string().trim().min(10, "Adres en az 10 karakter olmalı"),
-  postalCode: z.string().trim().regex(/^\d{5}$/, "Posta kodu 5 haneli olmalı"),
-})
+export const addressSchema = z
+  .object({
+    fullName: z.string().trim().min(3, "Ad soyad en az 3 karakter olmalı"),
+    phoneCode: z
+      .string()
+      .trim()
+      .transform((value) => {
+        const digits = value.replace(/\D/g, "")
+        return digits ? `+${digits}` : ""
+      })
+      .refine((value) => /^\+\d{1,4}$/.test(value), "Ülke kodunu +90 biçiminde girin"),
+    phone: z
+      .string()
+      .trim()
+      .transform((value) => value.replace(/\D/g, "")),
+    country: z.string().trim().min(2, "Ülke gerekli"),
+    city: z.string().trim().min(2, "İl gerekli"),
+    district: z.string().trim().min(2, "İlçe gerekli"),
+    line: z.string().trim().min(10, "Adres en az 10 karakter olmalı"),
+    postalCode: z.string().trim().regex(/^\d{5}$/, "Posta kodu 5 haneli olmalı"),
+  })
+  .superRefine((data, ctx) => {
+    const turkish = data.phoneCode === "+90" || data.phoneCode === ""
+    const valid = turkish ? /^05\d{9}$/.test(data.phone) : /^\d{6,15}$/.test(data.phone)
+    if (!valid) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["phone"],
+        message: turkish
+          ? "Geçerli bir cep telefonu girin (05xx)"
+          : "Geçerli bir telefon numarası girin",
+      })
+    }
+  })
 
 export const paymentSchema = z.object({
   cardName: z.string().trim().min(3, "Kart üzerindeki isim gerekli"),

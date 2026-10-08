@@ -1,3 +1,4 @@
+import { Eye, EyeOff } from "lucide-react"
 import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { fieldErrors, loginSchema } from "@/schemas/forms"
@@ -13,6 +14,7 @@ export function LoginPage() {
   const login = useAuthStore((state) => state.login)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState("")
 
@@ -60,7 +62,25 @@ export function LoginPage() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password">Şifre</Label>
-              <Input id="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="pr-11"
+                />
+                <button
+                  type="button"
+                  className="absolute top-1/2 right-2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
               {errors.password ? <p className="text-sm text-red-600">{errors.password}</p> : null}
             </div>
             {formError ? <p className="text-sm text-red-600">{formError}</p> : null}

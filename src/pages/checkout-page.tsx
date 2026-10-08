@@ -9,6 +9,7 @@ import { shippingCost, useOrderStore, type ShippingMethod } from "@/store/order-
 import { formatPrice } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -23,11 +24,14 @@ export function CheckoutPage() {
   const [step, setStep] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [orderId, setOrderId] = useState("")
+  const [openDoc, setOpenDoc] = useState<keyof typeof legalDocs | null>(null)
   const [shipping, setShipping] = useState<ShippingMethod>("standard")
   const [address, setAddress] = useState({
     fullName: user?.name ?? "",
     email: user?.email ?? "",
+    phoneCode: "",
     phone: "",
+    country: "",
     city: "",
     district: "",
     line: "",
@@ -75,7 +79,12 @@ export function CheckoutPage() {
     setErrors(nextErrors)
     if (!parsed.success || !emailCheck.success) return
     setSavedAddress(parsed.data)
-    setAddress((current) => ({ ...current, email: emailCheck.data, phone: parsed.data.phone }))
+    setAddress((current) => ({
+      ...current,
+      email: emailCheck.data,
+      phoneCode: parsed.data.phoneCode,
+      phone: parsed.data.phone,
+    }))
     setStep(1)
   }
 
@@ -140,7 +149,9 @@ export function CheckoutPage() {
           <form onSubmit={saveAddress} className="mt-6 grid gap-4 sm:grid-cols-2" noValidate>
             <Field label="Ad soyad" value={address.fullName} error={errors.fullName} onChange={(value) => updateAddress("fullName", value)} />
             <Field label="E-posta" type="email" value={address.email} error={errors.email} onChange={(value) => updateAddress("email", value)} />
+            <Field label="Telefon ülke kodu" value={address.phoneCode} error={errors.phoneCode} onChange={(value) => updateAddress("phoneCode", value)} placeholder="+90" />
             <Field label="Telefon" value={address.phone} error={errors.phone} onChange={(value) => updateAddress("phone", value)} placeholder="05xx" />
+            <Field label="Ülke" value={address.country} error={errors.country} onChange={(value) => updateAddress("country", value)} placeholder="Türkiye" />
             <Field label="İl" value={address.city} error={errors.city} onChange={(value) => updateAddress("city", value)} />
             <Field label="İlçe" value={address.district} error={errors.district} onChange={(value) => updateAddress("district", value)} />
             <Field label="Posta kodu" value={address.postalCode} error={errors.postalCode} onChange={(value) => updateAddress("postalCode", value)} />
@@ -208,8 +219,25 @@ export function CheckoutPage() {
             <Field label="CVC" value={payment.cvc} error={errors.cvc} onChange={(value) => updatePayment({ cvc: value.replace(/\D/g, "").slice(0, 3) })} />
             <label className="flex items-start gap-2 text-sm sm:col-span-2">
               <Checkbox checked={payment.accepted} onCheckedChange={(checked) => updatePayment({ accepted: checked === true })} />
-              <span>Mesafeli satış sözleşmesini ve ön bilgilendirme formunu okudum, onaylıyorum.</span>
+              <span>
+                <DocButton onOpen={() => setOpenDoc("sales")}>Mesafeli satış sözleşmesini</DocButton>
+                {" ve "}
+                <DocButton onOpen={() => setOpenDoc("preinfo")}>ön bilgilendirme formunu</DocButton>
+                {" okudum, onaylıyorum."}
+              </span>
             </label>
+            <Dialog open={openDoc !== null} onOpenChange={(open) => { if (!open) setOpenDoc(null) }}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{openDoc ? legalDocs[openDoc].title : ""}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3 overflow-y-auto px-5 py-4 text-sm leading-6 text-neutral-700">
+                  {openDoc
+                    ? legalDocs[openDoc].paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
+                    : null}
+                </div>
+              </DialogContent>
+            </Dialog>
             {errors.accepted ? <p className="text-sm text-red-600 sm:col-span-2">{errors.accepted}</p> : null}
             <div className="flex gap-3 sm:col-span-2">
               <Button variant="outline" onClick={() => setStep(1)}>Geri</Button>
@@ -239,6 +267,42 @@ export function CheckoutPage() {
         </div>
       </aside>
     </div>
+  )
+}
+
+const legalDocs = {
+  sales: {
+    title: "Mesafeli Satış Sözleşmesi",
+    paragraphs: [
+      "İşbu metin örnek amaçlıdır. OJS Nutrition ile alıcı arasında, siteden verilen siparişin koşullarını anlatmak için yazılmıştır.",
+    ],
+  },
+  preinfo: {
+    title: "Ön Bilgilendirme Formu",
+    paragraphs: [
+      "Bu form, sipariş tamamlanmadan önce alıcıya ürün, fiyat ve teslimat hakkında kısa bilgi vermek için hazırlanmış örnek bir metindir.",
+      "Satıcı unvanı OJS Nutrition olarak görünür. İletişim için sitedeki iletişim sayfası kullanılır. Ürün adı, aroma, gramaj ve adet sipariş özetinde listelenir.",
+      "Ödeme, alıcının girdiği kart bilgileriyle demo olarak kaydedilir. Gerçek bir banka tahsilatı yapılmaz ve kartın yalnızca son dört hanesi saklanır.",
+      "Teslimat, standart kargo veya aynı gün teslimat seçeneklerinden biriyle yapılır. Yüz Türk lirası ve üzeri standart gönderilerde kargo ücretsizdir.",
+      "Alıcı, sözleşmeyi ve bu formu okuduğunu kutuyu işaretleyerek beyan eder. Metinler dilediği zaman bu bağlantılardan yeniden açılabilir.",
+      "Kampanya, stok ve teslimat süreleri sipariş anındaki ekran bilgisine göredir. Sonradan yapılan fiyat değişiklikleri mevcut siparişi etkilemez.",
+    ],
+  },
+} as const
+
+function DocButton({ children, onOpen }: { children: string; onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      className="font-semibold underline underline-offset-2"
+      onClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onOpen()
+      }}
+    >
+      {children}
+    </button>
   )
 }
 
