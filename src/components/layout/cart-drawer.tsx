@@ -1,5 +1,6 @@
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react"
 import { Link } from "react-router-dom"
+import { getProduct } from "@/data/catalog"
 import { cartSubtotal, useCartStore } from "@/store/cart-store"
 import { formatPrice } from "@/lib/utils"
 import { ProductTub } from "@/components/product-tub"
@@ -37,7 +38,14 @@ export function CartDrawer() {
             {items.map((item) => (
               <div key={item.key} className="flex gap-3 border-b border-border pb-4">
                 <Link to={`/urun/${item.slug}`} onClick={close} className="w-16 shrink-0">
-                  <ProductTub label={item.shortLabel} flavor={item.flavorName} color={item.flavorColor} />
+                  <ProductTub
+                    label={item.shortLabel}
+                    flavor={item.flavorName}
+                    color={item.flavorColor}
+                    image={getProduct(item.slug)?.image}
+                    imageAlt={item.name}
+                    className="max-w-none"
+                  />
                 </Link>
                 <div className="min-w-0 flex-1">
                   <Link to={`/urun/${item.slug}`} onClick={close} className="font-semibold hover:underline">

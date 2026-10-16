@@ -82,15 +82,17 @@ export function ProductDetailPage() {
 
       <div className="mt-6 grid items-start gap-10 lg:grid-cols-2">
         <div
-          className="rounded-3xl px-8 py-10"
-          style={{ background: `linear-gradient(180deg, ${flavor.color}22, #f3f4f6)` }}
+          className={`rounded-3xl px-8 py-10 ${product.image ? "bg-neutral-100" : ""}`}
+          style={product.image ? undefined : { background: `linear-gradient(180deg, ${flavor.color}22, #f3f4f6)` }}
         >
           <ProductTub
             label={product.shortLabel}
             flavor={flavor.name}
             detail={size.servings}
             color={flavor.color}
-            className="mx-auto w-56 md:w-72"
+            image={product.image}
+            imageAlt={product.name}
+            className="mx-auto w-64 max-w-none md:w-80"
           />
         </div>
 

@@ -38,6 +38,7 @@ export type Product = {
   benefits: string[]
   nutrition: { label: string; value: string }[]
   usage: string
+  image?: string
 }
 
 export const products: Product[] = [
@@ -72,6 +73,7 @@ export const products: Product[] = [
       { label: "Yağ", value: "1,5 g" },
     ],
     usage: "1 ölçek (25 g) ürünü 200 ml su veya süt ile çalkalayın. Antrenman sonrasında tüketebilirsiniz.",
+    image: "/products/whey-protein.png",
   },
   {
     id: "creatine",
@@ -103,6 +105,7 @@ export const products: Product[] = [
       { label: "Şeker", value: "0 g" },
     ],
     usage: "1 ölçek (3 g) ürünü 200 ml suya karıştırın. Her gün aynı saatte tüketebilirsiniz.",
+    image: "/products/creatine.jpg",
   },
   {
     id: "bcaa",

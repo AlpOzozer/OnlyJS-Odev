@@ -6,9 +6,21 @@ type ProductTubProps = {
   detail?: string
   color: string
   className?: string
+  image?: string
+  imageAlt?: string
 }
 
-export function ProductTub({ label, flavor, detail, color, className }: ProductTubProps) {
+export function ProductTub({ label, flavor, detail, color, className, image, imageAlt }: ProductTubProps) {
+  if (image) {
+    return (
+      <img
+        src={image}
+        alt={imageAlt ?? `${label} ${flavor}`}
+        className={cn("mx-auto aspect-square w-full max-w-56 object-contain", className)}
+      />
+    )
+  }
+
   return (
     <div className={cn("relative mx-auto aspect-[3/4] w-full max-w-56", className)}>
       <div className="absolute bottom-1 left-[18%] h-3 w-[64%] rounded-full bg-black/25 blur-md" />

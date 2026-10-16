@@ -1,7 +1,7 @@
 import { ChevronDown, Menu, Search, ShoppingCart, User } from "lucide-react"
 import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { categories, getProduct, popularProducts, products } from "@/data/catalog"
+import { getProduct, popularProducts, products } from "@/data/catalog"
 import { cartCount, useCartStore } from "@/store/cart-store"
 import { useAuthStore } from "@/store/auth-store"
 import { Logo } from "@/components/logo"
@@ -13,6 +13,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+
+const desktopNav = [
+  { id: "protein", label: "PROTEİN" },
+  { id: "spor-gidalari", label: "SPOR GIDALARI" },
+  { id: "saglik", label: "SAĞLIK" },
+  { id: "gida", label: "GIDA" },
+  { id: "vitamin", label: "VİTAMİN" },
+]
 
 const menuLinks: Record<string, string[]> = {
   protein: ["whey-protein"],
@@ -121,15 +129,14 @@ export function Header() {
         </div>
       </form>
       <nav className="hidden bg-neutral-950 text-white md:block">
-        <ul className="mx-auto flex max-w-7xl items-center justify-center gap-1 px-4">
-          {categories.map((category) => (
+        <ul className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4">
+          {desktopNav.map((category) => (
             <li key={category.id} className="group relative">
               <Link
                 to={`/urunler?kategori=${category.id}`}
-                className="flex items-center gap-1 px-4 py-3 text-sm font-medium hover:text-neutral-300"
+                className="flex items-center px-4 py-3 text-xs font-semibold tracking-wide hover:text-neutral-300"
               >
-                {category.menu}
-                <ChevronDown className="size-4 opacity-70" />
+                {category.label}
               </Link>
               <div className="invisible absolute top-full left-0 z-30 min-w-52 rounded-b-lg bg-white py-2 text-neutral-900 opacity-0 shadow-xl transition group-hover:visible group-hover:opacity-100">
                 {(menuLinks[category.id] ?? []).map((slug) => {
@@ -151,9 +158,8 @@ export function Header() {
             </li>
           ))}
           <li>
-            <Link to="/urunler" className="flex items-center gap-1 px-4 py-3 text-sm font-medium hover:text-neutral-300">
-              Tüm Ürünler
-              <ChevronDown className="size-4 opacity-70" />
+            <Link to="/urunler" className="flex items-center px-4 py-3 text-xs font-semibold tracking-wide hover:text-neutral-300">
+              TÜM ÜRÜNLER
             </Link>
           </li>
         </ul>
@@ -185,14 +191,14 @@ export function Header() {
                 </Link>
               </>
             )}
-            {categories.map((category) => (
+            {desktopNav.map((category) => (
               <Link
                 key={category.id}
                 to={`/urunler?kategori=${category.id}`}
                 onClick={() => setMenuOpen(false)}
                 className="rounded-md px-3 py-2 hover:bg-muted"
               >
-                {category.menu}
+                {category.label}
               </Link>
             ))}
             <Link to="/urunler" onClick={() => setMenuOpen(false)} className="rounded-md px-3 py-2 font-semibold hover:bg-muted">

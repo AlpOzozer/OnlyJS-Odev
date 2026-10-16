@@ -19,7 +19,14 @@ export function ProductCard({ product }: { product: Product }) {
     <article className="flex h-full flex-col rounded-xl border border-border bg-white p-3 shadow-sm">
       <Link to={`/urun/${product.slug}`} className="relative block rounded-lg bg-neutral-100 px-6 py-4">
         {discount ? <Badge className="absolute top-3 left-3">%{discount}</Badge> : null}
-        <ProductTub label={product.shortLabel} flavor={flavor.name} detail={offer.label} color={flavor.color} />
+        <ProductTub
+          label={product.shortLabel}
+          flavor={flavor.name}
+          detail={offer.label}
+          color={flavor.color}
+          image={product.image}
+          imageAlt={product.name}
+        />
       </Link>
       <div className="mt-3 flex flex-1 flex-col gap-2">
         <Link to={`/urun/${product.slug}`} className="line-clamp-2 font-semibold hover:underline">
